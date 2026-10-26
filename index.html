@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Configuración PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="manifest.json">
+    
+    <title>My Healthly Life</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--primary);
+        }
+
+        .card.accent { border-left-color: var(--accent); }
+        .card.warning { border-left-color: var(--warning); }
+        .card.stats { border-left-color: #8b5cf6; }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--text-main);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        /* Stats Grid Lineal */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .stat-box {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 12px 8px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .stat-box h4 {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            white-space: nowrap;
+        }
+
+        .stat-box .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #8b5cf6;
+        }
+
+        .stat-box .target-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        /* Input y Controles */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="number"] {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            flex-grow: 1;
+        }
+
+        .btn-small {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .btn-small:hover { background: #475569; }
+
+        /* Timer Interactivo */
+        .timer-box {
+            background: #090d16;
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            border: 1px dashed var(--border-color);
+        }
+
+        .timer-display {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #60a5fa;
+            margin: 10px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 12px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* Marcador de Agua */
+        .water-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #064e3b33;
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #065f46;
+            gap: 10px;
+        }
+
+        .btn-water {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Grid de Comidas */
+        .food-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .food-card {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .food-card h3 {
+            font-size: 1rem;
+            color: #60a5fa;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .food-card .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background: #334155;
+            border-radius: 6px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .food-card p {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+        }
+
+        .alert-box {
+            background: #451a0366;
+            border-left: 4px solid var(--warning);
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #fde68a;
+            margin-top: 15px;
+            border: 1px solid #78350f;
+        }
+
+        /* Lista de Ejercicios */
+        .exercise-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #0f172a;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            transition: opacity 0.3s;
+        }
+
+        .exercise-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .exercise-item input[type="checkbox"]:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-save-day {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem; }
+        
+        .stats-grid::-webkit-scrollbar { height: 6px; }
+        .stats-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>My Healthly Life</h1>
+            <p>Hombre | 50 años | <span id="headerWeight">120</span> kg | Control Metabólico</p>
+        </header>
+
+        <!-- Panel de Estadísticas -->
+        <section class="card stats">
+            <h2>📊 Progreso e Historial</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>Días en Plan</h4>
+                    <div class="value" id="statDays">0</div>
+                </div>
+                <div class="stat-box">
+                    <h4>Ayunos</h4>
+                    <div class="value" id="statFasts">0</div>
+                </div>
+                <div class="stat-box">
+                    <h4>Rutinas</h4>
+                    <div class="value" id="statWorkouts">0</div>
+                </div>
+                <div class="stat-box">
+                    <h4>Peso (kg)</h4>
+                    <div class="value" id="statWeight" style="color: var(--primary);">120.0</div>
+                </div>
+                <div class="stat-box" style="border-color: var(--accent);">
+                    <h4>Meta Médica</h4>
+                    <div class="target-value">70-76 kg</div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="number" id="inputWeight" placeholder="Actualizar peso (Ej: 118.5)" step="0.1">
+                <button class="btn-small" onclick="updateWeight()">Guardar Peso</button>
+            </div>
+            <p id="weightDiff" style="font-size: 0.85rem; color: var(--accent); margin-top: 8px;"></p>
+        </section>
+
+        <!-- Reloj de Ayuno Intermitente -->
+        <section class="card">
+            <h2>⏳ Temporizador de Ayuno 16/8</h2>
+            <div class="timer-box">
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Horario Objetivo: 18:00 h a 10:00 h</p>
+                <div class="timer-display" id="timerClock">16:00:00</div>
+                <div class="action-buttons">
+                    <button class="btn-action" id="timerBtn" onclick="toggleTimer()">Iniciar Ayuno</button>
+                    <button class="btn-reset" onclick="resetTimer()" title="Reiniciar Temporizador">🔄</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hidratación -->
+        <section class="card accent">
+            <h2>💧 Control de Agua Diaria</h2>
+            <div class="water-control">
+                <div>
+                    <strong style="color: #34d399;">Meta: 3.5 Litros / día</strong>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);" id="waterDisplay">Acumulado: 0 / 3500 ml (0 Vasos)</p>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-reset" onclick="resetWater()" title="Reiniciar Agua">🔄</button>
+                    <button class="btn-water" onclick="addWater()">+1 Vaso</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Qué comer hoy -->
+        <section class="card warning">
+            <h2 id="mealTitle">🍳 Menú del Día: </h2>
+            <div class="alert-box" style="margin-top: 0; margin-bottom: 15px; background: #0f172a; border-color: var(--primary);">
+                💡 <strong>Regla de Oro:</strong> La primera comida al romper el ayuno debe priorizar proteínas y grasas saludables (como huevo, palta o atún) para evitar picos de insulina y mantener la saciedad.
+            </div>
+            
+            <div class="food-grid" id="dailyMeals">
+                <!-- Se inyecta con JavaScript -->
+            </div>
+
+            <div class="alert-box">
+                ⚠️ <strong>Aviso digestivo:</strong> Sin leche en polvo para evitar inflamación. Prioriza infusiones o agua.
+            </div>
+        </section>
+
+        <!-- Rutina de Ejercicios -->
+        <section class="card">
+            <h2 id="workoutTitle">🏠 Rutina del Día (Cero Impacto)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Ejercicios amigables con las articulaciones. Marca los completados:</p>
+
+            <div id="dailyWorkout">
+                <!-- Se inyecta con JavaScript -->
+            </div>
+        </section>
+
+        <button class="btn-save-day" onclick="saveDailyProgress()">💾 Guardar Progreso del Día</button>
+
+        <footer>
+            <p>Constancia por encima de la perfección • Plan Personalizado</p>
+            <button class="btn-reset" style="margin-top: 10px; font-size: 0.7rem; border:none;" onclick="hardReset()">Borrar todo el historial</button>
+        </footer>
+    </div>
+
+    <script>
+        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        
+        const planComidas = [
+            { desayuno: "Revoltillo de 3 huevos con cebolla y tomate. Café negro.", almuerzo: "Pollo asado al horno con ensalada surtida (lechuga, tomate, pepino).", cena: "Sopa de verduras casera con un chorrito de aceite de oliva." },
+            { desayuno: "2 huevos duros, 1/2 palta y té verde o negro sin azúcar.", almuerzo: "Carne de soya guisada con sofrito, acompañada de ensalada de repollo.", cena: "Tortilla de 2 huevos con zapallito italiano o acelga." },
+            { desayuno: "Ensalada tibia de atún en lata con tomate y aceite de oliva.", almuerzo: "Plato de lentejas guisadas (sin embutidos) con ensalada chilena.", cena: "Porción pequeña de avena preparada con agua y canela." },
+            { desayuno: "Huevos revueltos a la mantequilla. Infusión o café.", almuerzo: "Pechuga de pollo a la plancha con brócoli o coliflor al vapor.", cena: "Omelette simple con queso gauda derretido." },
+            { desayuno: "Rollitos de jamón y queso, acompañados de 1/2 palta.", almuerzo: "Guiso de porotos negros o garbanzos con vegetales.", cena: "Sopa de pollo ligera (caldo con vegetales, sin fideos)." },
+            { desayuno: "2 huevos fritos en un poquito de aceite o mantequilla. Café.", almuerzo: "Carne molida magra salteada con verduras mixtas.", cena: "1 lata de atún escurrida mezclada con palta pisada." },
+            { desayuno: "Tortilla de 2 huevos con jamón. Té o café negro.", almuerzo: "Carne de vacuno al jugo (corte magro) con ensalada verde abundante.", cena: "Crema de verduras (zapallo o espinaca) hecha en casa." }
+        ];
+
+        const planEjercicios = [
+            [ { nombre: "Caminata suave", desc: "20 minutos de caminata a ritmo relajado." }, { nombre: "Estiramientos básicos", desc: "10 minutos estirando piernas, espalda y brazos." } ],
+            [ { nombre: "Sentadillas asistidas a la silla", desc: "3 series de 10 reps. Úsala de apoyo al bajar." }, { nombre: "Puente de glúteos en el suelo", desc: "3 series de 10 reps." }, { nombre: "Marcha suave en el sitio", desc: "10 minutos. Sin saltos." } ],
+            [ { nombre: "Flexiones inclinadas en pared", desc: "3 series de 10 reps. Protege codos." }, { nombre: "Elevación de brazos sin peso", desc: "3 series de 15 reps." }, { nombre: "Rotación de hombros", desc: "2 minutos hacia adelante y atrás." } ],
+            [ { nombre: "Marcha suave continua", desc: "20 minutos a buen ritmo pero sin impacto." }, { nombre: "Movilidad articular general", desc: "5 minutos girando articulaciones." } ],
+            [ { nombre: "Sentadillas asistidas a la silla", desc: "3 series de 8 reps." }, { nombre: "Flexiones inclinadas en pared", desc: "3 series de 10 reps." }, { nombre: "Rodillas al pecho de pie", desc: "3 series de 12 reps alternando." } ],
+            [ { nombre: "Plancha modificada (apoyo en rodillas)", desc: "3 series aguantando 15-20 segundos." }, { nombre: "Puente de glúteos", desc: "3 series de 12 reps." }, { nombre: "Estiramiento de cobra suave", desc: "Para aliviar tensión lumbar." } ],
+            [ { nombre: "Caminata continua", desc: "25-30 minutos de caminata a paso firme." } ]
+        ];
+
+        function loadDailyContent() {
+            const hoyIndex = new Date().getDay(); 
+            
+            document.getElementById('mealTitle').innerText = `🍳 Menú de hoy: ${diasSemana[hoyIndex]}`;
+            document.getElementById('workoutTitle').innerText = `🏠 Rutina de hoy: ${diasSemana[hoyIndex]}`;
+
+            const menuHoy = planComidas[hoyIndex];
+            document.getElementById('dailyMeals').innerHTML = `
+                <div class="food-card">
+                    <h3>10:00 h - Romper Ayuno</h3>
+                    <span class="badge">Proteínas + Grasas</span>
+                    <p>✔️ ${menuHoy.desayuno}</p>
+                </div>
+                <div class="food-card">
+                    <h3>14:00 h - Comida Principal</h3>
+                    <span class="badge">Proteínas + Fibra</span>
+                    <p>✔️ ${menuHoy.almuerzo}</p>
+                </div>
+                <div class="food-card">
+                    <h3>18:00 h - Cena Temprana</h3>
+                    <span class="badge">Cierre Ligero</span>
+                    <p>✔️ ${menuHoy.cena}</p>
+                </div>
+            `;
+
+            const rutinasHoy = planEjercicios[hoyIndex];
+            let rutinasHTML = "";
+            rutinasHoy.forEach((ejercicio, index) => {
+                rutinasHTML += `
+                    <div class="exercise-item">
+                        <input type="checkbox" class="workout-check" onchange="if(this.checked) this.disabled = true;">
+                        <div>
+                            <strong style="font-size: 0.95rem;">${index + 1}. ${ejercicio.nombre}</strong>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">${ejercicio.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('dailyWorkout').innerHTML = rutinasHTML;
+        }
+
+        let appData = JSON.parse(localStorage.getItem('healthPlanData')) || {
+            startDate: new Date().toDateString(),
+            currentWeight: 120.0,
+            initialWeight: 120.0,
+            totalFasts: 0,
+            totalWorkouts: 0,
+            history: []
+        };
+
+        const SECONDS_IN_16_HOURS = 16 * 3600;
+
+        function updateDashboard() {
+            const start = new Date(appData.startDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+            document.getElementById('statDays').innerText = diffDays;
+            document.getElementById('statFasts').innerText = appData.totalFasts;
+            document.getElementById('statWorkouts').innerText = appData.totalWorkouts;
+            
+            document.getElementById('statWeight').innerText = appData.currentWeight;
+            document.getElementById('headerWeight').innerText = appData.currentWeight;
+
+            let diff = appData.currentWeight - appData.initialWeight;
+            let diffText = document.getElementById('weightDiff');
+            if (diff < 0) {
+                diffText.innerText = `📉 Has perdido ${Math.abs(diff).toFixed(1)} kg desde el inicio!`;
+                diffText.style.color = "var(--accent)";
+            } else if (diff > 0) {
+                diffText.innerText = `📈 Has subido ${diff.toFixed(1)} kg.`;
+                diffText.style.color = "var(--warning)";
+            }
+        }
+
+        function updateWeight() {
+            let input = document.getElementById('inputWeight').value;
+            if (input && input > 0) {
+                appData.currentWeight = parseFloat(input);
+                saveData();
+                updateDashboard();
+                document.getElementById('inputWeight').value = '';
+                alert("Peso actualizado correctamente.");
+            }
+        }
+
+        let currentWater = 0;
+        function addWater() {
+            if (currentWater < 3500) {
+                currentWater += 250;
+            }
+            updateWaterDisplay();
+        }
+
+        function resetWater() {
+            currentWater = 0;
+            updateWaterDisplay();
+        }
+
+        function updateWaterDisplay() {
+            let glasses = currentWater / 250;
+            document.getElementById('waterDisplay').innerText = `Acumulado: ${currentWater} / 3500 ml (${glasses} Vasos)`;
+        }
+
+        let timerRunning = false;
+        let totalSeconds = SECONDS_IN_16_HOURS;
+        let timerInterval;
+
+        function toggleTimer() {
+            let btn = document.getElementById('timerBtn');
+            if (!timerRunning) {
+                timerRunning = true;
+                btn.innerText = "Pausar Ayuno";
+                btn.style.background = "var(--warning)";
+                timerInterval = setInterval(runTimer, 1000);
+            } else {
+                timerRunning = false;
+                btn.innerText = "Reanudar Ayuno";
+                btn.style.background = "var(--primary)";
+                clearInterval(timerInterval);
+            }
+        }
+
+        function resetTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            totalSeconds = SECONDS_IN_16_HOURS;
+            
+            let btn = document.getElementById('timerBtn');
+            btn.innerText = "Iniciar Ayuno";
+            btn.style.background = "var(--primary)";
+            
+            document.getElementById('timerClock').innerText = "16:00:00";
+            document.getElementById('timerClock').style.color = "#60a5fa";
+        }
+
+        function runTimer() {
+            if (totalSeconds > 0) {
+                totalSeconds--;
+                let hrs = Math.floor(totalSeconds / 3600);
+                let mins = Math.floor((totalSeconds % 3600) / 60);
+                let secs = totalSeconds % 60;
+                document.getElementById('timerClock').innerText = 
+                    `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                clearInterval(timerInterval);
+                document.getElementById('timerClock').innerText = "¡Completado!";
+                document.getElementById('timerClock').style.color = "var(--accent)";
+            }
+        }
+
+        function saveDailyProgress() {
+            let fastCompleted = (totalSeconds === 0);
+            
+            let checks = document.querySelectorAll('.workout-check');
+            let exercisesDone = 0;
+            checks.forEach(check => { 
+                if(check.checked || check.disabled) exercisesDone++; 
+            });
+            let workoutCompleted = exercisesDone >= (checks.length > 1 ? 2 : 1);
+
+            if (fastCompleted) appData.totalFasts++;
+            if (workoutCompleted) appData.totalWorkouts++;
+
+            let todayRecord = {
+                date: new Date().toDateString(),
+                water: currentWater,
+                fasted: fastCompleted,
+                exercised: workoutCompleted
+            };
+            appData.history.push(todayRecord);
+
+            saveData();
+            updateDashboard();
+
+            let vasos = currentWater / 250;
+            let mensaje = `¡Progreso del día guardado con éxito!\n\n` +
+                          `📊 Resumen de hoy:\n` +
+                          `💧 Vasos de agua: ${vasos}\n` +
+                          `💪 Ejercicios completados: ${exercisesDone}\n` +
+                          `⏳ Ayuno 16/8: ${fastCompleted ? 'Logrado ✅' : 'Incompleto ❌'}`;
+
+            alert(mensaje);
+
+            resetWater();
+            resetTimer();
+            checks.forEach(check => {
+                check.checked = false;
+                check.disabled = false;
+            });
+        }
+
+        function saveData() {
+            localStorage.setItem('healthPlanData', JSON.stringify(appData));
+        }
+
+        function hardReset() {
+            if(confirm("¿Estás seguro de que quieres borrar todo el historial? Esto no se puede deshacer.")){
+                localStorage.removeItem('healthPlanData');
+                location.reload();
+            }
+        }
+
+        loadDailyContent();
+        updateDashboard();
+
+        // Activar PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
